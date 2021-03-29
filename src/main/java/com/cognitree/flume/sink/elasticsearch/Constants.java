@@ -26,9 +26,9 @@ public class Constants {
 
     public static final String PREFIX = "es.";
 
-    public static final String INDEX = "index";
-    public static final String TYPE = "type";
-    public static final String ID = "id";
+    public static final String INDEX = "es.indexName";
+    public static final String TYPE = "es.indexType";
+    public static final String ID = "es.id";
 
     public static final String ES_BULK_ACTIONS = "es.bulkActions";
     public static final Integer DEFAULT_ES_BULK_ACTIONS = 1000;
@@ -59,13 +59,13 @@ public class Constants {
     public static final String DEFAULT_ES_TYPE = "default";
 
     public static final String ES_INDEX_BUILDER = "es.index.builder";
-    public static final String DEFAULT_ES_INDEX_BUILDER = "com.cognitree.flume.sink.elasticsearch.StaticIndexBuilder";
+    public static final String DEFAULT_ES_INDEX_BUILDER = "com.cognitree.flume.sink.elasticsearch.TimeBasedIndexNameBuilder";
 
     public static final String ES_SERIALIZER = "es.serializer";
     public static final String DEFAULT_ES_SERIALIZER = "com.cognitree.flume.sink.elasticsearch.SimpleSerializer";
 
     // Mandatory Properties
-    public static final String ES_CLUSTER_NAME = "cluster.name";
+    public static final String ES_CLUSTER_NAME = "es.cluster.name";
     public static final String DEFAULT_ES_CLUSTER_NAME = "elasticsearch";
 
     public static final String ES_HOSTS = "es.client.hosts";

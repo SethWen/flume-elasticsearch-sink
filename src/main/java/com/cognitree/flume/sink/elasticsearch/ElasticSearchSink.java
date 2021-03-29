@@ -15,11 +15,12 @@
  */
 package com.cognitree.flume.sink.elasticsearch;
 
-import com.cognitree.flume.sink.elasticsearch.client.BulkProcessorBulider;
+import com.cognitree.flume.sink.elasticsearch.client.BulkProcessorBuilder;
 import com.cognitree.flume.sink.elasticsearch.client.ElasticsearchClientBuilder;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.flume.Channel;
@@ -58,7 +59,7 @@ public class ElasticSearchSink extends AbstractSink implements Configurable {
 
     private BulkProcessor bulkProcessor;
 
-    private IndexBuilder indexBuilder;
+    private IndexNameBuilder indexBuilder;
 
     private Serializer serializer;
 
@@ -74,12 +75,10 @@ public class ElasticSearchSink extends AbstractSink implements Configurable {
     public void configure(Context context) {
         String[] hosts = getHosts(context);
         if (ArrayUtils.isNotEmpty(hosts)) {
-            client = new ElasticsearchClientBuilder(
-                    context.getString(PREFIX + ES_CLUSTER_NAME, DEFAULT_ES_CLUSTER_NAME), hosts)
-                    .build();
+            client = new ElasticsearchClientBuilder(context.getString(ES_CLUSTER_NAME, DEFAULT_ES_CLUSTER_NAME), hosts).build();
             buildIndexBuilder(context);
             buildSerializer(context);
-            bulkProcessor = new BulkProcessorBulider().buildBulkProcessor(context, this);
+            bulkProcessor = new BulkProcessorBuilder().buildBulkProcessor(context, this);
         } else {
             logger.error("Could not create Rest client, No host exist");
         }
@@ -99,21 +98,18 @@ public class ElasticSearchSink extends AbstractSink implements Configurable {
                 String body = new String(event.getBody(), Charsets.UTF_8);
                 if (!Strings.isNullOrEmpty(body)) {
                     logger.debug("start to sink event [{}].", body);
-                    String index = indexBuilder.getIndex(event);
+                    String index = indexBuilder.getIndexName(event);
                     String type = indexBuilder.getType(event);
                     String id = indexBuilder.getId(event);
                     XContentBuilder xContentBuilder = serializer.serialize(event);
                     if (xContentBuilder != null) {
                         if (!(Strings.isNullOrEmpty(id))) {
-                            bulkProcessor.add(new IndexRequest(index, type, id)
-                                    .source(xContentBuilder));
+                            bulkProcessor.add(new IndexRequest(index, type, id).source(xContentBuilder));
                         } else {
-                            bulkProcessor.add(new IndexRequest(index, type)
-                                    .source(xContentBuilder));
+                            bulkProcessor.add(new IndexRequest(index, type).source(xContentBuilder));
                         }
                     } else {
-                        logger.error("Could not serialize the event body [{}] for index [{}], type[{}] and id [{}] ",
-                                new Object[]{body, index, type, id});
+                        logger.error("Could not serialize the event body [{}] for index [{}], type[{}] and id [{}] ", body, index, type, id);
                     }
                 }
                 logger.debug("sink event [{}] successfully.", body);
@@ -149,6 +145,10 @@ public class ElasticSearchSink extends AbstractSink implements Configurable {
             indexBuilderClass = context.getString(ES_INDEX_BUILDER);
         }
         this.indexBuilder = instantiateClass(indexBuilderClass);
+        System.out.println("======================================================");
+        System.out.println("ElasticSearchSink.buildIndexBuilder: indexBuilder=" + this.indexBuilder);
+        System.out.println("ElasticSearchSink.buildIndexBuilder: params=" + context.getParameters());
+        System.out.println("======================================================");
         if (this.indexBuilder != null) {
             this.indexBuilder.configure(context);
         }

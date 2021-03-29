@@ -38,9 +38,9 @@ import static com.cognitree.flume.sink.elasticsearch.Constants.*;
  * This class creates  an instance of the {@link BulkProcessor}
  * Set the configuration for the BulkProcessor through {@link Context} object
  */
-public class BulkProcessorBulider {
+public class BulkProcessorBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(BulkProcessorBulider.class);
+    private static final Logger logger = LoggerFactory.getLogger(BulkProcessorBuilder.class);
 
     private String bulkProcessorName;
 
@@ -80,11 +80,11 @@ public class BulkProcessorBulider {
     private BulkProcessor build(final RestHighLevelClient client) {
         logger.trace("Bulk processor name: [{}]  bulkActions: [{}], bulkSize: [{}], flush interval time: [{}]," +
                         " concurrent Request: [{}], backoffPolicyTimeInterval: [{}], backoffPolicyRetries: [{}] ",
-                new Object[]{bulkProcessorName, bulkActions, bulkSize, flushIntervalTime,
-                        concurrentRequest, backoffPolicyTimeInterval, backoffPolicyRetries});
+                bulkProcessorName, bulkActions, bulkSize, flushIntervalTime,
+                concurrentRequest, backoffPolicyTimeInterval, backoffPolicyRetries);
+
         BiConsumer<BulkRequest, ActionListener<BulkResponse>> bulkConsumer =
-                (request, bulkListener) -> client
-                        .bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+                (request, bulkListener) -> client.bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
         return BulkProcessor.builder(bulkConsumer, getListener())
                 .setBulkActions(bulkActions)
                 .setBulkSize(bulkSize)
